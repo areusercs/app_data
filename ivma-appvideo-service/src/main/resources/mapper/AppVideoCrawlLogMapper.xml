@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.certus.ivma.mapper.AppVideoCrawlLogMapper">
+
+    <resultMap type="AppVideoCrawlLog" id="appVideoCrawlLogMap">
+        <id property="id" column="ID"/>
+        <result property="taskId" column="TASK_ID"/>
+        <result property="taskStartTime" column="TASK_START_TIME"/>
+        <result property="taskEndTime" column="TASK_END_TIME"/>
+        <result property="serverIp" column="SERVER_IP"/>
+        <result property="success" column="SUCCESS"/>
+        <result property="message" column="MESSAGE"/>
+        <result property="insertTime" column="INSERT_TIME"/>
+        <result property="taskBatchNo" column="TASK_BATCH_NO"/>
+        <result property="appId" column="APP_ID"/>
+    </resultMap>
+
+
+    <insert id="insertCrawlLog" parameterType="AppVideoCrawlLog" statementType="PREPARED" useGeneratedKeys="true">
+        <selectKey keyProperty="id" resultType="Long" order="BEFORE">
+            SELECT IVMA_APPVIDEO_CRAWL_LOG$SEQ.nextval FROM dual
+        </selectKey>
+        INSERT INTO IVMA_APPVIDEO_CRAWL_LOG(id, task_id, task_start_time, task_end_time, server_ip, insert_time,task_batch_no,app_id)
+        VALUES(
+        #{id, jdbcType=BIGINT},
+        #{taskId, jdbcType=BIGINT},
+        to_date(#{taskStartTime, jdbcType=VARCHAR}, 'yyyy-mm-dd hh24:mi:ss'),
+        to_date(#{taskEndTime, jdbcType=VARCHAR}, 'yyyy-mm-dd hh24:mi:ss'),
+        #{serverIp, jdbcType=VARCHAR},
+        to_date(#{insertTime, jdbcType=VARCHAR}, 'yyyy-mm-dd hh24:mi:ss'),
+        #{taskBatchNo, jdbcType=VARCHAR},
+        #{appId, jdbcType=BIGINT}
+        )
+    </insert>
+
+    <update id="updateCrawlLog" parameterType="AppVideoCrawlLog" statementType="PREPARED">
+        UPDATE IVMA_APPVIDEO_CRAWL_LOG a
+        SET a.task_end_time = to_date(#{taskEndTime, jdbcType=VARCHAR}, 'yyyy-mm-dd hh24:mi:ss'),
+        a.success = #{success, jdbcType=BOOLEAN},
+        a.message = #{message, jdbcType=VARCHAR}
+        WHERE a.id = #{id, jdbcType=BIGINT}
+    </update>
+
+</mapper>

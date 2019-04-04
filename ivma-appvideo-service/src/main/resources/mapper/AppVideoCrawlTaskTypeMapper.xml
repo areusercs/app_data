@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.certus.ivma.mapper.AppVideoCrawlTaskTypeMapper">
+
+    <resultMap type="AppVideoCrawlTaskType" id="appVideoCrawlTaskTypeMap">
+        <id property="id" column="ID"/>
+        <result property="appCrawlTypeCode" column="APP_CRAWL_TYPE_CODE"/>
+        <result property="appCrawlTypeName" column="APP_CRAWL_TYPE_NAME"/>
+        <result property="crawlTaskCron" column="CRAWL_TASK_CRON"/>
+        <result property="is_expired" column="IS_EXPIRED"/>
+    </resultMap>
+
+
+    <select id="getCrawlType" statementType="PREPARED" resultMap="appVideoCrawlTaskTypeMap">
+        SELECT *
+        FROM IVMA_APPVIDEO_CRAWL_TASK_TYPE a
+        WHERE IS_EXPIRED = 0
+    </select>
+
+</mapper>

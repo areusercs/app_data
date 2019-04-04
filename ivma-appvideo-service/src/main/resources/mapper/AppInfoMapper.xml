@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.certus.ivma.mapper.AppInfoMapper">
+
+    <select id="selectAllAppInfoList" statementType="PREPARED" resultType="AppInfo">
+        SELECT a.id			id,
+        a.name		name,
+        a.eng_name	engName,
+        a.app_type	appType,
+        a.app_icon	appIcon,
+        a.access_method	accessMethod,
+        a.app_iden	appIden,
+        a.app_classify appClassify,
+        a.is_avsp	avspFlag,
+        a.app_level	appLevel,
+        a.app_version appVersion,
+        a.location_id locationId,
+        a.is_live	liveFlag,
+        a.script_version scriptVersion,
+        to_char(a.version_update_time, 'yyyy-mm-dd hh24:mi:ss') versionUpdateTime,
+        to_char(a.insert_time, 'yyyy-mm-dd hh24:mi:ss')	insertTime
+        FROM IVMA_APP a
+        WHERE a.IS_EXPIRED=0
+        ORDER BY a.id asc
+    </select>
+</mapper>

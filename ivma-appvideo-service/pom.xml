@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<artifactId>ivma-appvideo-service</artifactId>
+
+	<name>ivma-appvideo-service</name>
+	<description>数据服务模块</description>
+
+	<parent>
+		<groupId>com.certus.ivma</groupId>
+		<artifactId>app_data</artifactId>
+		<version>1.0.0</version>
+	</parent>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.certus.ivma</groupId>
+			<artifactId>ivma-appvideo-base</artifactId>
+			<version>${ivma-appvideo.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.certus.ivma</groupId>
+			<artifactId>ivma-appvideo-common</artifactId>
+			<version>${ivma-appvideo.version}</version>
+		</dependency>
+		<!-- Mybatis -->
+		<dependency>
+			<groupId>org.mybatis.spring.boot</groupId>
+			<artifactId>mybatis-spring-boot-starter</artifactId>
+			<version>2.0.0</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<finalName>ivma-appvideo-base-${project.version}</finalName>
+		<plugins>
+		</plugins>
+	</build>
+
+</project>

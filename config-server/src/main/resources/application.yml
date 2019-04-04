@@ -1,0 +1,30 @@
+server:
+  port: 8888
+
+spring:
+  application:
+    name: config-server
+  cloud:
+    config:
+      server:
+        git:
+          #指向的是配置文件所在的git项目uri  #默认的仓库
+          uri: https://github.com/userarecs/CheSh
+          repos:
+            simple: https://github.com/userarecs/CheSh
+            shell:
+              pattern: shell/*
+              uri: https://github.com/userarecs/CheSh
+          #指定的是匹配查询的路径名
+#          search-paths: '{profile}'
+#          searchPaths: test
+          searchPaths: '{application}/{profile}'
+          username:
+          password:
+      #配置仓库的分支
+#      label: master
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8000/eureka/

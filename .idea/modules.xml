@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/app_data.iml" filepath="$PROJECT_DIR$/app_data.iml" />
+      <module fileurl="file://$PROJECT_DIR$/config-client/config-client.iml" filepath="$PROJECT_DIR$/config-client/config-client.iml" />
+      <module fileurl="file://$PROJECT_DIR$/config-server/config-server.iml" filepath="$PROJECT_DIR$/config-server/config-server.iml" />
+      <module fileurl="file://$PROJECT_DIR$/eureka-server/eureka-server.iml" filepath="$PROJECT_DIR$/eureka-server/eureka-server.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ivma-appvideo-base/ivma-appvideo-base.iml" filepath="$PROJECT_DIR$/ivma-appvideo-base/ivma-appvideo-base.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ivma-appvideo-common/ivma-appvideo-common.iml" filepath="$PROJECT_DIR$/ivma-appvideo-common/ivma-appvideo-common.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ivma-appvideo-crawl/ivma-appvideo-crawl.iml" filepath="$PROJECT_DIR$/ivma-appvideo-crawl/ivma-appvideo-crawl.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ivma-appvideo-monitor/ivma-appvideo-monitor.iml" filepath="$PROJECT_DIR$/ivma-appvideo-monitor/ivma-appvideo-monitor.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ivma-appvideo-service/ivma-appvideo-service.iml" filepath="$PROJECT_DIR$/ivma-appvideo-service/ivma-appvideo-service.iml" />
+    </modules>
+  </component>
+</project>

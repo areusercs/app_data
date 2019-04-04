@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.certus.ivma.mapper.AppVideoCrawlTaskMapper">
+
+    <resultMap type="AppVideoCrawlTask" id="appVideoCrawlTaskMap">
+        <id property="taskId" column="TASK_ID"/>
+        <result property="appId" column="APP_ID"/>
+        <result property="appName" column="APP_NAME"/>
+        <result property="appEngName" column="APP_ENG_NAME"/>
+        <result property="taskType" column="TASK_TYPE"/>
+        <result property="batchNo" column="BATCH_NO"/>
+        <result property="status" column="STATUS"/>
+        <result property="createTime" column="CREATE_TIME"/>
+        <result property="scheduleTime" column="SCHEDULE_TIME"/>
+        <result property="scheduleHost" column="SCHEDULE_HOST"/>
+        <result property="runningTime" column="RUNNING_TIME"/>
+        <result property="finishedTime" column="FINISHED_TIME"/>
+        <result property="priority" column="PRIORITY"/>
+        <result property="dispatchType" column="TASK_DISPATCH_TYPE"/>
+    </resultMap>
+
+
+    <insert id="insertCrawlTask" parameterType="AppVideoCrawlTask" statementType="PREPARED" useGeneratedKeys="true">
+        <selectKey keyProperty="taskId" resultType="Long" order="BEFORE">
+            SELECT IVMA_APPVIDEO_CRAWL_TASK$SEQ.nextval FROM dual
+        </selectKey>
+        INSERT INTO IVMA_APPVIDEO_CRAWL_TASK(task_id, app_id, app_name, app_eng_name, task_type, batch_no, status, create_time, schedule_time, running_time, finished_time, schedule_host, priority,task_dispatch_type)
+        VALUES(
+        #{taskId, jdbcType=BIGINT},
+        #{appId, jdbcType=BIGINT},
+        #{appName, jdbcType=VARCHAR},
+        #{appEngName, jdbcType=VARCHAR},
+        #{taskType, jdbcType=VARCHAR},
+        #{batchNo, jdbcType=VARCHAR},
+        #{status, jdbcType=INTEGER},
+        to_date(#{createTime, jdbcType=VARCHAR}, 'yyyy-mm-dd hh24:mi:ss'),
+        to_date(#{scheduleTime, jdbcType=VARCHAR}, 'yyyy-mm-dd hh24:mi:ss'),
+        to_date(#{runningTime, jdbcType=VARCHAR}, 'yyyy-mm-dd hh24:mi:ss'),
+        to_date(#{finishedTime, jdbcType=VARCHAR}, 'yyyy-mm-dd hh24:mi:ss'),
+        #{scheduleHost, jdbcType=VARCHAR},
+        #{priority, jdbcType=INTEGER},
+        #{dispatchType, jdbcType=VARCHAR}
+        )
+    </insert>
+    <!--查询IVMA_APPVIDEO_CRAWL_LOG表中 执行状态为失败success = 0 并且 IVMA_APPVIDEO_CRAWL_TASK表中运行时间小于limitTimes 秒的任务-->
+    <select id="selectFailFastCrawlTaskList" statementType="PREPARED" parameterType="java.util.Map" resultType="AppVideoCrawlTask">
+        <!-- SELECT a.task_id taskId,
+                   a.app_id		appId,
+                   a.app_name	appName,
+                   a.app_eng_name appEngName,
+                   a.task_type taskType,
+                   a.batch_no	batchNo,
+                   a.status		status,
+                   to_char(a.create_time, 'yyyy-mm-dd hh24:mi:ss')	createTime,
+                   to_char(a.schedule_time, 'yyyy-mm-dd hh24:mi:ss') scheduleTime,
+                   to_char(a.running_time, 'yyyy-mm-dd hh24:mi:ss') runningTime,
+                   to_char(a.finished_time, 'yyyy-mm-dd hh24:mi:ss') finishedTime,
+                   a.schedule_host	scheduleHost,
+                   a.priority	priority
+              FROM IVMA_APPVIDEO_CRAWL_TASK a,
+                   (SELECT max(t.id) id, t.app_id
+                      FROM IVMA_APPVIDEO_CRAWL_LOG t
+                     WHERE t.task_batch_no = #{batchNo, jdbcType=VARCHAR} AND
+                     t.success = 0
+                     GROUP BY t.app_id) b
+             WHERE a.app_id = b.app_id
+               AND a.batch_no = #{batchNo, jdbcType=VARCHAR}
+             <![CDATA[
+               AND (a.finished_time - a.running_time) * 24 * 3600 < #{limitTimes, jdbcType=INTEGER}
+             ]]> 		-->
+
+        SELECT a.task_id taskId,
+        a.app_id		appId,
+        a.app_name	appName,
+        a.app_eng_name appEngName,
+        a.task_type taskType,
+        a.batch_no	batchNo,
+        a.status		status,
+        to_char(a.create_time, 'yyyy-mm-dd hh24:mi:ss')	createTime,
+        to_char(a.schedule_time, 'yyyy-mm-dd hh24:mi:ss') scheduleTime,
+        to_char(a.running_time, 'yyyy-mm-dd hh24:mi:ss') runningTime,
+        to_char(a.finished_time, 'yyyy-mm-dd hh24:mi:ss') finishedTime,
+        a.schedule_host	scheduleHost,
+        a.priority	priority
+        FROM IVMA_APPVIDEO_CRAWL_TASK a,IVMA_APPVIDEO_CRAWL_LOG b
+        WHERE b.success = 0 and a.task_id = b.task_id
+        AND a.batch_no = #{batchNo, jdbcType=VARCHAR}
+        <![CDATA[
+		   AND (a.finished_time - a.running_time) * 24 * 3600 < #{limitTimes, jdbcType=INTEGER}
+		 ]]>
+    </select>
+
+    <update id="reCrawlTask" statementType="PREPARED" parameterType="java.util.Map">
+        UPDATE IVMA_APPVIDEO_CRAWL_TASK a
+        SET a.status = 0,
+        a.priority = #{priority, jdbcType=INTEGER},
+        a.schedule_time = null,
+        a.running_time = null,
+        a.schedule_host = null,
+        a.finished_time = null
+        WHERE a.task_id = #{taskId, jdbcType=BIGINT}
+    </update>
+
+    <select id="countCrawlTaskSchedule" statementType="PREPARED" parameterType="java.util.Map" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM IVMA_APPVIDEO_CRAWL_TASK a
+        WHERE a.status = 0
+        AND a.batch_no = #{batchNo, jdbcType=VARCHAR}
+        AND a.task_type = #{taskType, jdbcType=VARCHAR}
+    </select>
+
+    <select id="selectCrawlTaskSchedule" statementType="PREPARED" parameterType="java.util.Map" resultMap="appVideoCrawlTaskMap">
+        SELECT *
+        FROM IVMA_APPVIDEO_CRAWL_TASK a
+        WHERE a.status = 0
+        AND a.batch_no = #{batchNo, jdbcType=VARCHAR}
+        AND a.task_type = #{taskType, jdbcType=VARCHAR}
+    </select>
+
+    <select id="selectNoActiveCrawlTaskHost" statementType="PREPARED" parameterType="java.util.Map" resultType="AppVideoCrawlHost">
+        SELECT * from (
+        SELECT a.* FROM IVMA_APPVIDEO_CRAWL_HOST a
+        WHERE a.ACTIVE = 0
+        and a.keepalive_time=(SELECT min(keepalive_time) as keepalive_time FROM IVMA_APPVIDEO_CRAWL_HOST)
+        ORDER BY a.keepalive_time
+        desc
+        )
+        WHERE rownum=1
+    </select>
+
+    <update id="updateCrawlTask" parameterType="AppVideoCrawlTask" statementType="PREPARED">
+        UPDATE IVMA_APPVIDEO_CRAWL_TASK a
+        SET a.batch_no = a.batch_no
+        <if test="status != null">
+            ,a.status = #{status, jdbcType=INTEGER}
+        </if>
+        <if test="createTime != null">
+            ,a.create_time = to_date(#{createTime, jdbcType=VARCHAR}, 'yyyy-mm-dd hh24:mi:ss')
+        </if>
+        <if test="scheduleTime != null">
+            ,a.schedule_time = to_date(#{scheduleTime, jdbcType=VARCHAR}, 'yyyy-mm-dd hh24:mi:ss')
+        </if>
+        <if test="scheduleHost != null">
+            ,a.schedule_host = #{scheduleHost, jdbcType=VARCHAR}
+        </if>
+        <if test="runningTime != null">
+            ,a.running_time = to_date(#{runningTime, jdbcType=VARCHAR}, 'yyyy-mm-dd hh24:mi:ss')
+        </if>
+        <if test="finishedTime != null">
+            ,a.finished_time = to_date(#{finishedTime, jdbcType=VARCHAR}, 'yyyy-mm-dd hh24:mi:ss')
+        </if>
+        WHERE a.task_id = #{taskId, jdbcType=BIGINT}
+    </update>
+
+    <update id="updataCrawlTaskScheduleHostByTaskId" parameterType="java.util.Map" statementType="PREPARED">
+        UPDATE IVMA_APPVIDEO_CRAWL_TASK a
+          a.schedule_host =  #{ip, jdbcType=VARCHAR}
+        WHERE a.task_id = #{taskId, jdbcType=BIGINT}
+    </update>
+
+</mapper>

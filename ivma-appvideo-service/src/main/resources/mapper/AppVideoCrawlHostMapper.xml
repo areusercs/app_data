@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.certus.ivma.mapper.AppVideoCrawlHostMapper">
+
+    <resultMap type="AppVideoCrawlHost" id="appVideoCrawlHostMap">
+        <id property="hostIp" column="HOST_IP"/>
+        <result property="active" column="ACTIVE"/>
+        <result property="crawlType" column="CRAWL_TYPE"/>
+        <result property="insertTime" column="INSERT_TIME"/>
+        <result property="updateTime" column="UPDATE_TIME"/>
+        <result property="keepAliveTime" column="KEEPALIVE_TIME"/>
+        <result property="maxPollSize" column="MAX_POLL_SIZE"/>
+        <result property="nowPollSize" column="NOW_POLL_SIZE"/>
+    </resultMap>
+
+    <select id="selectNotActiveCrawlTaskHost" parameterType="java.util.Map" resultMap="appVideoCrawlHostMap">
+       SELECT * from (
+        SELECT a.* FROM IVMA_APPVIDEO_CRAWL_HOST a
+        WHERE a.ACTIVE = 0
+        and a.keepalive_time=(SELECT min(keepalive_time) as keepalive_time FROM IVMA_APPVIDEO_CRAWL_HOST)
+        ORDER BY a.keepalive_time
+        desc
+        )
+        WHERE rownum=1
+    </select>
+
+    <update id="mergeCrawlHost" parameterType="AppVideoCrawlHost" statementType="PREPARED">
+        MERGE INTO IVMA_APPVIDEO_CRAWL_HOST a
+        USING (SELECT #{hostIp, jdbcType=VARCHAR} host_ip,
+        #{crawlType, jdbcType=VARCHAR} crawl_type,
+        #{active, jdbcType=BOOLEAN} active,
+        to_date(#{insertTime, jdbcType=VARCHAR}, 'yyyy-mm-dd hh24:mi:ss') insert_time,
+        to_date(#{updateTime, jdbcType=VARCHAR}, 'yyyy-mm-dd hh24:mi:ss') update_time,
+        to_date(#{keepAliveTime, jdbcType=VARCHAR}, 'yyyy-mm-dd hh24:mi:ss') keepalive_time,
+        #{maxPollSize, jdbcType=INTEGER} max_poll_size,
+        #{nowPollSize, jdbcType=INTEGER} now_poll_size
+        FROM DUAL
+        ) b
+        ON (a.host_ip = b.host_ip)
+        WHEN MATCHED THEN
+        UPDATE SET a.crawl_type = b.crawl_type,
+        a.active = b.active,
+        a.update_time = b.update_time,
+        a.keepalive_time = b.keepalive_time,
+        a.max_poll_size = b.max_poll_size,
+        a.now_poll_size = b.now_poll_size
+        WHEN NOT MATCHED THEN
+        INSERT (host_ip, crawl_type, active, insert_time, update_time, keepalive_time,max_poll_size,now_poll_size)
+        VALUES (b.host_ip, b.crawl_type, b.active, b.insert_time, b.update_time, b.keepalive_time, b.max_poll_size, b.now_poll_size)
+    </update>
+
+    <select id="selectCrawlHostByIp" statementType="PREPARED" parameterType="java.util.Map" resultType="AppVideoCrawlHost">
+        SELECT a.host_ip	hostIp,
+        a.crawl_type	crawlType,
+        a.active		active,
+        to_char(a.insert_time, 'yyyy-mm-dd hh24:mi:ss')	insertTime,
+        to_char(a.update_time, 'yyyy-mm-dd hh24:mi:ss')	updateTime,
+        to_char(a.keepalive_time, 'yyyy-mm-dd hh24:mi:ss')	keepAliveTime
+        FROM IVMA_APPVIDEO_CRAWL_HOST a
+        WHERE a.host_ip = #{hostIp, jdbcType=VARCHAR}
+    </select>
+
+    <update id="updateKeepAliveTime" parameterType="map" statementType="PREPARED">
+        UPDATE IVMA_APPVIDEO_CRAWL_HOST a
+        SET a.keepalive_time = sysdate,
+        a.active = 1,
+        a.now_poll_size = #{nowPollSize, jdbcType=INTEGER}
+        WHERE a.host_ip = #{hostIp, jdbcType=VARCHAR}
+    </update>
+
+    <!-- 将两分钟没有运行的 服务状态改为 0  两分钟一次 -->
+    <update id="updateActiveByKeepAliveTime" parameterType="java.lang.Integer" statementType="PREPARED">
+        UPDATE IVMA_APPVIDEO_CRAWL_HOST a
+        SET a.active = 0
+        WHERE 1=1
+        <![CDATA[
+		   AND (sysdate - a.keepalive_time) * 24 * 3600 > #{keepAliveTimes, jdbcType=INTEGER}
+		 ]]>
+    </update>
+
+</mapper>
